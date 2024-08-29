@@ -9,9 +9,9 @@ class ApplicationSerializer(serializers.ModelSerializer):
 class RedemptionCodeSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True, help_text="创建时间")
     code = serializers.CharField(read_only=True, help_text="兑换码")
-    application = serializers.PrimaryKeyRelatedField(queryset=Application.objects.all(), help_text="关联的应用ID")
-    expiration_date = serializers.DateTimeField(help_text="过期时间")
-    is_active = serializers.BooleanField(help_text="是否激活")
+    application = serializers.PrimaryKeyRelatedField(queryset=Application.objects.all(), help_text="关联的应用ID", required=False, allow_null=True)
+    expiration_date = serializers.DateTimeField(help_text="过期时间", required=False, allow_null=True)
+    is_active = serializers.BooleanField(help_text="是否激活", default=True)
 
     class Meta:
         model = RedemptionCode
@@ -26,6 +26,15 @@ class RedemptionCodeSerializer(serializers.ModelSerializer):
         return instance
 
 class BulkCreateRedemptionCodeSerializer(serializers.Serializer):
-    application_id = serializers.IntegerField(help_text="应用ID")
-    expiration_date = serializers.DateTimeField(help_text="过期时间")
+    expiration_date = serializers.DateTimeField(help_text="过期时间", required=False, allow_null=True)
     count = serializers.IntegerField(min_value=1, max_value=1000, help_text="创建数量（1-1000）")
+
+    class Meta:
+        model = RedemptionCode
+        fields = ['code', 'application', 'expiration_date', 'is_active']
+
+class ValidateRedemptionCodeSerializer(serializers.Serializer):
+
+    class Meta:
+        model = RedemptionCode
+        fields = ['code', 'application_id']
